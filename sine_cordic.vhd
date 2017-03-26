@@ -31,6 +31,7 @@ architecture syn of sine_cordic is
         (
             reset       : in std_logic;
             clk         : in std_logic;
+	    index       : in integer;
             alpha       : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
             k_n         : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
             beta_in     : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
@@ -71,6 +72,7 @@ begin
             port map(
                 reset       => reset,
                 clk         => clk,
+                index	    => j,
                 alpha       => std_logic_vector(to_unsigned(integer(1.0/arctan(2.0**(j))*2.0**REAL_CORRECTION), INTERNAL_PRECISION)), --TODO shift
                 k_n         => k_n,
                 beta_in     => beta_array(j-1),

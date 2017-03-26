@@ -2,11 +2,13 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.sine_cordic_constants.all;
+
 entity cordic_step is
 	port (
 		reset       : in std_logic;
 		clk         : in std_logic;
-		index       : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
+		index       : in integer;
 		alpha       : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
 		k_n         : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
 		beta_in     : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
@@ -28,14 +30,14 @@ begin  -- cordic_step_arc
 
 	cordic_iteration : process(alpha, beta_in, sine_in, cosine_in)
 	begin
-		if beta_in < 0 then 
-			cosine_int <= cosine_in + (sine_in sra index);
-			sine_int <= sine_in - (cosine_in sra index);
-			beta_int <= beta_in + alpha;
+		if beta_in < "0" then 
+			cosine_int <= std_logic_vector(signed(cosine_in) + shift_right(signed(sine_in), index));
+			sine_int <= std_logic_vector(signed(sine_in) - shift_right(signed(cosine_in), index));
+			beta_int <= std_logic_vector(signed(beta_in) + signed(alpha));
 		else
-			cosine_int <= cosine_in - (sine_in sra index);
-			sine_int <= sine_in + (cosine_in sra index);
-			beta_int <= beta_in - alpha;
+			cosine_int <= std_logic_vector(signed(cosine_in) - shift_right(signed(sine_in), index));
+			sine_int <= std_logic_vector(signed(sine_in) + shift_right(signed(cosine_in), index));
+			beta_int <= std_logic_vector(signed(beta_in) - signed(alpha));
 		end if;
 	end process cordic_iteration;
 	
