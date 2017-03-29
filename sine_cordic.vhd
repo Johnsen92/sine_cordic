@@ -6,10 +6,10 @@ use ieee.math_real.all;
 
 entity sine_cordic is
     generic (
-        INPUT_DATA_WIDTH    : integer := 8;
-        OUTPUT_DATA_WIDTH   : integer := 8;
-        ITERATION_COUNT     : integer := 16;
-        INTERNAL_PRECISION  : integer := 8
+        INPUT_DATA_WIDTH    : integer := work.sine_cordic_constants.INPUT_DATA_WIDTH;
+        OUTPUT_DATA_WIDTH   : integer := work.sine_cordic_constants.OUTPUT_DATA_WIDTH;
+        ITERATION_COUNT     : integer := work.sine_cordic_constants.ITERATION_COUNT;
+        INTERNAL_PRECISION  : integer := work.sine_cordic_constants.INTERNAL_PRECISION
     );
     port
     (
@@ -27,13 +27,11 @@ architecture syn of sine_cordic is
     constant REAL_CORRECTION : integer := 10; -- used to convert real decimal to representative integer
     
     component cordic_step is
+
         port
         (
-            reset       : in std_logic;
-            clk         : in std_logic;
-	    index       : in integer;
+	    poweroftwo  : in integer;
             alpha       : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
-            k_n         : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
             beta_in     : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
             sine_in     : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
             cosine_in   : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
@@ -70,11 +68,9 @@ begin
     begin
         cordic_step_inst : cordic_step
             port map(
-                reset       => reset,
-                clk         => clk,
-                index	    => j,
+                poweroftwo  => j-1,
+		-- REAL_CORRECTION = INTERNAL_PRECISION - 1
                 alpha       => std_logic_vector(to_unsigned(integer(1.0/arctan(2.0**(j))*2.0**REAL_CORRECTION), INTERNAL_PRECISION)), --TODO shift
-                k_n         => k_n,
                 beta_in     => beta_array(j-1),
                 sine_in     => sine_array(j-1),
                 cosine_in   => cosine_array(j-1),
