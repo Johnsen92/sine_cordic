@@ -30,7 +30,7 @@ begin  -- cordic_init_arc
 
 	input_alignment : process(beta_in, sine_in, cosine_in)
 	begin
-		if signed(beta_in) < signed(float_to_fixed(-MATH_PI_OVER_2, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH)) OR signed(beta_in) > signed(float_to_fixed(-MATH_PI_OVER_2, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH)) then 
+		if signed(beta_in) < signed(float_to_fixed(-MATH_PI_OVER_2, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH)) OR signed(beta_in) > signed(float_to_fixed(MATH_PI_OVER_2, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH)) then 
 			if signed(beta_in) < 0 then
 				beta_int <= std_logic_vector(signed(beta_in) + signed(float_to_fixed(MATH_PI, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH)));
 			else
