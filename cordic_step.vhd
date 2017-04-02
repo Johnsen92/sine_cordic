@@ -5,23 +5,26 @@ use ieee.numeric_std.all;
 use work.sine_cordic_constants.all;
 
 entity cordic_step is
+    generic (
+        DATA_WIDTH  : integer := 8
+    );
 	port (
 		poweroftwo  : in integer;
-		alpha       : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
-		beta_in     : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
-		sine_in     : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
-		cosine_in   : in std_logic_vector(INTERNAL_PRECISION-1 downto 0);
-		beta_out    : out std_logic_vector(INTERNAL_PRECISION-1 downto 0);
-		sine_out    : out std_logic_vector(INTERNAL_PRECISION-1 downto 0);
-		cosine_out  : out std_logic_vector(INTERNAL_PRECISION-1 downto 0)
+		alpha       : in std_logic_vector(DATA_WIDTH-1 downto 0);
+		beta_in     : in std_logic_vector(DATA_WIDTH-1 downto 0);
+		sine_in     : in std_logic_vector(DATA_WIDTH-1 downto 0);
+		cosine_in   : in std_logic_vector(DATA_WIDTH-1 downto 0);
+		beta_out    : out std_logic_vector(DATA_WIDTH-1 downto 0);
+		sine_out    : out std_logic_vector(DATA_WIDTH-1 downto 0);
+		cosine_out  : out std_logic_vector(DATA_WIDTH-1 downto 0)
 	);
 end cordic_step;
 
 architecture cordic_step_arc of cordic_step is
 
-signal sine_int 	: std_logic_vector(INTERNAL_PRECISION-1 downto 0);
-signal cosine_int	: std_logic_vector(INTERNAL_PRECISION-1 downto 0);
-signal beta_int		: std_logic_vector(INTERNAL_PRECISION-1 downto 0);
+signal sine_int 	: std_logic_vector(DATA_WIDTH-1 downto 0);
+signal cosine_int	: std_logic_vector(DATA_WIDTH-1 downto 0);
+signal beta_int		: std_logic_vector(DATA_WIDTH-1 downto 0);
 
 begin  -- cordic_step_arc
 
