@@ -36,8 +36,8 @@ begin  -- cordic_init_arc
 			else
 				beta_int <= std_logic_vector(signed(beta_in) - signed(float_to_fixed(MATH_PI, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH)));
 			end if;
-			cosine_int <= std_logic_vector(NOT(signed(cosine_in)));
-			sine_int <=  std_logic_vector(NOT(signed(sine_int)));
+			cosine_int <= std_logic_vector(-(signed(cosine_in)));
+			sine_int <=  std_logic_vector(-(signed(sine_int)));
 		else
 			beta_int <= beta_in;
 			cosine_int <= cosine_in;
