@@ -8,7 +8,6 @@ use work.sine_cordic_constants.all;
 entity cordic_init is
 	generic (
         	DATA_WIDTH  : integer := 8;
-		INPUT_DATA_WIDTH  : integer := 8
     	);
 	port (
 		beta_in     : in std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -30,11 +29,11 @@ begin  -- cordic_init_arc
 
 	input_alignment : process(beta_in, sine_in, cosine_in)
 	begin
-		if signed(beta_in) < signed(float_to_fixed(-MATH_PI_OVER_2, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH)) OR signed(beta_in) > signed(float_to_fixed(MATH_PI_OVER_2, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH)) then 
+		if signed(beta_in) < signed(float_to_fixed(-MATH_PI_OVER_2, DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, DATA_WIDTH)) OR signed(beta_in) > signed(float_to_fixed(MATH_PI_OVER_2, DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, DATA_WIDTH)) then 
 			if signed(beta_in) < 0 then
-				beta_int <= std_logic_vector(signed(beta_in) + signed(float_to_fixed(MATH_PI, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH)));
+				beta_int <= std_logic_vector(signed(beta_in) + signed(float_to_fixed(MATH_PI, DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, DATA_WIDTH)));
 			else
-				beta_int <= std_logic_vector(signed(beta_in) - signed(float_to_fixed(MATH_PI, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH)));
+				beta_int <= std_logic_vector(signed(beta_in) - signed(float_to_fixed(MATH_PI, DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, DATA_WIDTH)));
 			end if;
 			cosine_int <= std_logic_vector(-(signed(cosine_in)));
 			sine_int <=  std_logic_vector(-(signed(sine_int)));
