@@ -7,7 +7,7 @@ use work.sine_cordic_constants.all;
 
 entity cordic_init is
 	generic (
-        	DATA_WIDTH  : integer := 8;
+        	DATA_WIDTH  : integer := 8
     	);
 	port (
 		beta_in     : in std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -36,7 +36,7 @@ begin  -- cordic_init_arc
 				beta_int <= std_logic_vector(signed(beta_in) - signed(float_to_fixed(MATH_PI, DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, DATA_WIDTH)));
 			end if;
 			cosine_int <= std_logic_vector(-(signed(cosine_in)));
-			sine_int <=  std_logic_vector(-(signed(sine_int)));
+			sine_int <=  std_logic_vector(-(signed(sine_in)));
 		else
 			beta_int <= beta_in;
 			cosine_int <= cosine_in;

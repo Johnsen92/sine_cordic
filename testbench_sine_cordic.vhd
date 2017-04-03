@@ -26,7 +26,7 @@ architecture beh of testbench is
         );
     end component;
 
-    constant CLK_PERIOD : time := 2 ps;
+    constant CLK_PERIOD : time := 4 ns;
     constant INPUT_DATA_WIDTH : integer := 8;
     constant OUTPUT_DATA_WIDTH : integer := 8;
     constant ITERATION_COUNT : integer := 12;
@@ -40,8 +40,10 @@ architecture beh of testbench is
         -MATH_PI*3.0**(-1),
         MATH_PI*4.0**(-1),
         -MATH_PI*4.0**(-1),
-        MATH_PI*6.0**(-1),
-        -MATH_PI*6.0**(-1)
+        MATH_PI,
+        -MATH_PI
+        --MATH_PI*6.0**(-1),
+        ---MATH_PI*6.0**(-1)
     );
 
     signal clk, reset : std_logic;

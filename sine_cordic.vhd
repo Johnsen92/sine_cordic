@@ -52,12 +52,29 @@ architecture syn of sine_cordic is
             result  : out std_logic_vector(DATA_WIDTH*2-1 downto 0)
         );
     end component;
-    
+
+    component cordic_init is
+	generic (
+            DATA_WIDTH  : integer := 8
+    	);
+	port (
+	    beta_in     : in std_logic_vector(DATA_WIDTH-1 downto 0);
+	    sine_in     : in std_logic_vector(DATA_WIDTH-1 downto 0);
+	    cosine_in   : in std_logic_vector(DATA_WIDTH-1 downto 0);
+	    beta_out    : out std_logic_vector(DATA_WIDTH-1 downto 0);
+            sine_out    : out std_logic_vector(DATA_WIDTH-1 downto 0);
+	    cosine_out  : out std_logic_vector(DATA_WIDTH-1 downto 0)
+	);
+    end component;    
+
+
     type DATA_ARRAY_TYPE is array(0 to ITERATION_COUNT) of std_logic_vector(INPUT_DATA_WIDTH-1 downto 0); --extra output at end; ITERATION_COUNT is used instead of I_C-1 as an ITERATION_COUNT of 0 should also be supported
     
     signal k_n : std_logic_vector(INPUT_DATA_WIDTH-1 downto 0);
+    signal beta_next, beta_init, sine_init, cosine_init : std_logic_vector(INPUT_DATA_WIDTH-1 downto 0);
     signal beta_array, beta_array_next, sine_array, sine_array_next, cosine_array, cosine_array_next : DATA_ARRAY_TYPE;
     signal control : std_logic_vector(ITERATION_COUNT downto 0);
+    signal control_init : std_logic;
     signal mult_result : std_logic_vector(INPUT_DATA_WIDTH*2-1 downto 0);
     
     constant RESULT_HIGH : integer := OUTPUT_DATA_WIDTH-1;
@@ -90,7 +107,7 @@ begin
     
     mult_inst : mult
         generic map (
-            DATA_WIDTH  => INPUT_DATA_WIDTH
+            DATA_WIDTH  => OUTPUT_DATA_WIDTH
         )
         port map (
             clk     => clk,
@@ -100,6 +117,19 @@ begin
             result  => mult_result
         );
 
+    init : cordic_init
+    generic map (
+	DATA_WIDTH  => OUTPUT_DATA_WIDTH
+    )
+    port map (
+	beta_in    => beta_next,
+	sine_in    => (others => '0'),
+	cosine_in  => float_to_fixed(1.0, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH),
+	beta_out   => beta_init,
+	sine_out   => sine_init,
+	cosine_out => cosine_init
+    );
+
     sync : process(reset, clk)
     begin
         if(rising_edge(clk)) then
@@ -107,24 +137,33 @@ begin
                 beta_array      <= (others => (others => '0'));
                 sine_array      <= (others => (others => '0'));
                 cosine_array    <= (others => (others => '0'));
+		beta_next 	<= (others => '0');
                 control         <= (others => '0');
                 done            <= '0';
+		control_init	<= '0';
             else
-                done                                <= control(ITERATION_COUNT);
+                beta_next	<= beta;
+		control_init	<= start;
+
+		done                                <= control(ITERATION_COUNT);
                 control(ITERATION_COUNT downto 1)   <= control(ITERATION_COUNT-1 downto 0);
-                control(0)                          <= start;
-                
-                beta_array(0)   <= beta;
+                --control(0)                          <= control_init;
+		control(0)                          <= start;
+               
+                --beta_array(0)   <= beta;
+                beta_array(0)   <= beta_init;
                 for i in 1 to ITERATION_COUNT loop
                     beta_array(i)   <= beta_array_next(i);
                 end loop;
-                
-                sine_array(0)   <= (others => '0');
+               
+                --sine_array(0)   <= (others => '0');
+                sine_array(0)   <= sine_init;
                 for i in 1 to ITERATION_COUNT loop
                     sine_array(i)   <= sine_array_next(i);
                 end loop;
                 
-                cosine_array(0) <= float_to_fixed(1.0, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH);
+		--cosine_array(0) <= float_to_fixed(1.0, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH);
+                cosine_array(0) <= cosine_init;
                 for i in 1 to ITERATION_COUNT loop
                     cosine_array(i) <= cosine_array_next(i);
                 end loop;
