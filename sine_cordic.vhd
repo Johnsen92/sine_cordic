@@ -147,22 +147,18 @@ begin
 
 		done                                <= control(ITERATION_COUNT);
                 control(ITERATION_COUNT downto 1)   <= control(ITERATION_COUNT-1 downto 0);
-                --control(0)                          <= control_init;
 		control(0)                          <= start;
                
-                --beta_array(0)   <= beta;
                 beta_array(0)   <= beta_init;
                 for i in 1 to ITERATION_COUNT loop
                     beta_array(i)   <= beta_array_next(i);
                 end loop;
                
-                --sine_array(0)   <= (others => '0');
                 sine_array(0)   <= sine_init;
                 for i in 1 to ITERATION_COUNT loop
                     sine_array(i)   <= sine_array_next(i);
                 end loop;
                 
-		--cosine_array(0) <= float_to_fixed(1.0, INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH);
                 cosine_array(0) <= cosine_init;
                 for i in 1 to ITERATION_COUNT loop
                     cosine_array(i) <= cosine_array_next(i);
