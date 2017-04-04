@@ -27,9 +27,9 @@ architecture beh of testbench is
     end component;
 
     constant CLK_PERIOD : time := 4 ns;
-    constant INPUT_DATA_WIDTH : integer := 8;
-    constant OUTPUT_DATA_WIDTH : integer := 8;
-    constant ITERATION_COUNT : integer := 12;
+    constant INPUT_DATA_WIDTH : integer := 32;
+    constant OUTPUT_DATA_WIDTH : integer := 32;
+    constant ITERATION_COUNT : integer := 24;
     
     type testcase_array is array(8 downto 0) of real;
     constant testcases : testcase_array := (
