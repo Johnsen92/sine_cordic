@@ -32,6 +32,11 @@ architecture beh of testbench is
     constant ITERATION_COUNT : integer := 24;
     
     type testcase_array is array(8 downto 0) of real;
+    constant CLK_PERIOD : time := 2 ps;
+    constant INPUT_DATA_WIDTH : integer := 8;
+    constant OUTPUT_DATA_WIDTH : integer := 8;
+    constant ITERATION_COUNT : integer := 12;
+    type testcase_array is array(10 downto 0) of real;
     constant testcases : testcase_array := (
         0.0,
         MATH_PI*2.0**(-1),
@@ -40,10 +45,10 @@ architecture beh of testbench is
         -MATH_PI*3.0**(-1),
         MATH_PI*4.0**(-1),
         -MATH_PI*4.0**(-1),
+        MATH_PI*6.0**(-1),
+        MATH_PI*6.0**(-1),
         MATH_PI,
         -MATH_PI
-        --MATH_PI*6.0**(-1),
-        ---MATH_PI*6.0**(-1)
     );
 
     signal clk, reset : std_logic;
