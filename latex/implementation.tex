@@ -91,7 +91,7 @@ The \textit{cordic\_step} entity implements one single iteration of the algorith
 
 One instance of the component represents one iteration of the algorithm shown in section 1.1 and performs exactly the same operations. In the loop of the refernce algorithm \textit{poweroftwo} refers to a variable with the initial value 1 which is subsequently devided by two in each iteration (representing the term \(2^{-n}\) where \textit{n} is the loop variable) and used in the matrix multiplication to determine the new values of the sine and cosine vector. In our case the same functionality is implemented by simply shifting the current value for \textit{n} bits to the right which is matematically the same operation.
 
-Instead of calculating a \textit{sigma} to determine the sign of the factor used in the matrix multiplication as it is done in the reference algorithm, we decided to simply use an if-statement checking the sign of \textit{beta} and perform either addition or subtraction accordingly. By doing so we completely eradicated the matrixmultiplication from our implementation and broke it down to a sequence of shifts, checks, additions and subtractions. This was to keep the implementation simple and to maintain good performance due to multiplication in VHDL being much slower than the operations mentioned above.
+Instead of calculating a \textit{sigma} to determine the sign of the factor used in the matrix multiplication as it is done in the reference algorithm, we decided to simply use an if-statement checking the sign of \textit{beta} and perform either addition or subtraction accordingly. By doing so we completely eradicated the matrixmultiplication from our implementation and broke it down to a sequence of shifts, control flow checks, additions and subtractions. This was to keep the implementation simple and to maintain good performance due to multiplication in VHDL being much slower than the operations mentioned above.
 
 \subsection{mult.vhd} 
 
@@ -156,4 +156,4 @@ The entity comes with the following ports:
 	\end{tabular} 
 \end{center}
 
-The generic \textit{ITERATION\_COUNT} defines how many instances of the \textit{cordic\_step} entity are put together in the pipeline. 
+The generic \textit{ITERATION\_COUNT} defines how many instances of the \textit{cordic\_step} entity are put together in the pipeline. This means that after \textit{ITERATION\_COUNT} + 2 clock cycles after a set \textit{start} bit the calculation should be finished and the \textit{done} bit should be set. 
