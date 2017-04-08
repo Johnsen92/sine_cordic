@@ -9,7 +9,7 @@ entity cordic_step is
         DATA_WIDTH  : integer := 8
     );
 	port (
-		poweroftwo  : in integer;
+		poweroftwo  : in integer range 0 to DATA_WIDTH;
 		alpha       : in std_logic_vector(DATA_WIDTH-1 downto 0);
 		beta_in     : in std_logic_vector(DATA_WIDTH-1 downto 0);
 		sine_in     : in std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -28,7 +28,7 @@ signal beta_int		: std_logic_vector(DATA_WIDTH-1 downto 0);
 
 begin  -- cordic_step_arc
 
-	cordic_iteration : process(alpha, beta_in, sine_in, cosine_in)
+	cordic_iteration : process(alpha, beta_in, sine_in, cosine_in, poweroftwo)
 	begin
 		if signed(beta_in) < 0 then 
 			cosine_int <= std_logic_vector(signed(cosine_in) + shift_right(signed(sine_in), poweroftwo));

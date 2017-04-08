@@ -11,7 +11,7 @@ entity mult is
 	port (
         clk     : in std_logic;
         reset   : in std_logic;
-	dataa   : in std_logic_vector(DATA_WIDTH-1 downto 0);
+        dataa   : in std_logic_vector(DATA_WIDTH-1 downto 0);
         datab   : in std_logic_vector(DATA_WIDTH-1 downto 0);
         result  : out std_logic_vector(DATA_WIDTH*2-1 downto 0)
 	);
