@@ -27,7 +27,7 @@ architecture beh of testbench is
     end component;
 
     constant CLK_PERIOD : time := 2 ps;
-    constant INPUT_DATA_WIDTH : integer := 16;
+    constant INPUT_DATA_WIDTH : integer := 8;
     constant OUTPUT_DATA_WIDTH : integer := 8;
     constant ITERATION_COUNT : integer := 12;
     constant INTERNAL_DATA_WIDTH : integer := MAX(INPUT_DATA_WIDTH, OUTPUT_DATA_WIDTH);

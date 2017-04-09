@@ -67,7 +67,7 @@ architecture syn of sine_cordic is
         );
     end component;    
     
-    constant INTERNAL_DATA_WIDTH : integer := MAX(INPUT_DATA_WIDTH, OUTPUT_DATA_WIDTH);
+    constant INTERNAL_DATA_WIDTH : integer := MAX(INPUT_DATA_WIDTH, OUTPUT_DATA_WIDTH) + 6;
     
     type DATA_ARRAY_TYPE is array(0 to ITERATION_COUNT) of std_logic_vector(INTERNAL_DATA_WIDTH-1 downto 0); --extra output at end; ITERATION_COUNT is used instead of I_C-1 as an ITERATION_COUNT of 0 should also be supported
     

@@ -51,7 +51,7 @@ package body sine_cordic_constants is
         variable factor : real := 1.0 ;
         variable data_out : CORDIC_DATA_TYPE := (0.0, 0.0, 0.0);
     begin
-        if beta < -MATH_PI*2.0**(-1) or beta > MATH_PI*2.0**(-1) then
+        if beta < -MATH_PI*2.0**(-1.0) or beta > MATH_PI*2.0**(-1.0) then
             if beta < 0.0 then
                 beta := beta + MATH_PI;
             else
