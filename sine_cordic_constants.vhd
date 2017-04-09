@@ -10,6 +10,7 @@ package sine_cordic_constants is
     
     constant Q_FORMAT_INTEGER_PLACES : integer := 3;
     
+    function MIN(a, b : integer) return integer;
     function MAX(a, b : integer) return integer;
     function compute_cordic_step(data_in : CORDIC_DATA_TYPE; i : integer) return CORDIC_DATA_TYPE;
     function float_to_fixed(x : real; b : integer; w : integer) return std_logic_vector;
@@ -19,6 +20,16 @@ package sine_cordic_constants is
 end package;
     
 package body sine_cordic_constants is
+    
+    function MIN(a, b : integer) return integer
+    is
+    begin
+        if a < b then
+            return a;
+        else
+            return b;
+        end if;
+    end function;
     
     function MAX(a, b : integer) return integer
     is
@@ -57,7 +68,7 @@ package body sine_cordic_constants is
     function float_to_fixed(x : real; b : integer; w : integer) return std_logic_vector
     is
     begin
-        return std_logic_vector(to_signed(integer(round(x*2.0**b)), w));
+        return std_logic_vector(to_signed(integer((x*2.0**b)), w));
     end function;
     
     function fixed_to_float(x : std_logic_vector; b : integer) return real

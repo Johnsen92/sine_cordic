@@ -29,7 +29,7 @@ architecture syn of sine_cordic is
             DATA_WIDTH  : integer := 8
         );
         port (
-            poweroftwo  : in integer range 0 to DATA_WIDTH;
+            poweroftwo  : in integer;
             alpha       : in std_logic_vector(DATA_WIDTH-1 downto 0);
             beta_in     : in std_logic_vector(DATA_WIDTH-1 downto 0);
             sine_in     : in std_logic_vector(DATA_WIDTH-1 downto 0);
@@ -128,7 +128,7 @@ begin
         )
         port map (
             beta_in    => beta_cast,
-            sine_in    => (others => '0'),
+            sine_in    => float_to_fixed(0.0, INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INTERNAL_DATA_WIDTH),
             cosine_in  => float_to_fixed(1.0, INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INTERNAL_DATA_WIDTH),
             beta_out   => beta_init,
             sine_out   => sine_init,
