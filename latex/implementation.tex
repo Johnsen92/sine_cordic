@@ -1,14 +1,27 @@
 \section{Implementation}
-We decided to use a pipeline design with generic pipeline length because the software algorithm strongly suggested it. Furthermore we used a modular design to keep the complexity low and to leave room for later improvements.
+We decided to use a pipeline design with generic pipeline length because the software algorithm strongly suggested it. Furthermore, we used a modular design to keep the complexity low and to leave room for later improvements.
 
 Our design structure contains a top entity called \textit{sine\_cordic} in which the wiring of the subcomponents and the synchronization of the pipeline stages takes place.
 
-Our subentities and at the same time our pipeline stages consist of an initialization stage called \textit{cordic\_init}, an entity that represents a single iteration of the algorithm called \textit{cordic\_step} and a final muliplication entity simply called \textit{mult} to execute the multiplication with a correction factor as final step of the algorithm. 
+Our subentities, which are at the same time our pipeline stages, consist of an initialization stage called \textit{cordic\_init}, an entity that represents a single iteration of the algorithm called \textit{cordic\_step} and a final muliplication entity simply called \textit{mult} to execute the multiplication with a correction factor as final step of the algorithm. 
 
 \subsection{angles and Kvalues}
 
-For the values of \textit{angles} and \textit{Kvalues} we chose to implement them as functions
+We chose to implement the values of \textit{angles} and \textit{Kvalues}  as functions
 instead of a predefined array like it is done in the reference algorithm. This provides the possibility to define an arbitrarily large number of iterations without dropping accuracy from running out of array elements (like it happens in the reference algorithm).
+
+\textit{angles} is defined by the term \(arctan(2^{-i})\), where \textit{i} is the index of the current iteration. 
+
+\textit{Kn} is a correction factor used in the final step of the algorithm and is defined by the term $\prod\limits_{i=0}^{n-1}\frac{1}{\sqrt{1+2^{-2i}}}$, where \textit{n} is the number of iterations.
+
+For the conversion from float to our own fixpoint format and vice versa we implemented the functions:
+
+\begin{lstlisting}[language=VHDL]
+function float_to_fixed(x : real; b : integer; w : integer) 
+return std_logic_vector;
+function fixed_to_float(x : std_logic_vector; b : integer) 
+return real;
+\end{lstlisting}
 
 \subsection{cordic\_init.vhd}
 
@@ -17,13 +30,13 @@ This entity is used to align the input angle to a value between \(-\pi/2\) and \
 \begin{lstlisting}[language=Matlab]
 
 if beta < -pi/2 || beta > pi/2
-if beta < 0
-v = cordic(beta + pi, n);
-else
-v = cordic(beta - pi, n);
-end
-v = -v; % flip the sign for second or third quadrant
-return
+	if beta < 0
+		v = cordic(beta + pi, n);
+	else
+		v = cordic(beta - pi, n);
+	end
+	v = -v; % flip the sign for second or third quadrant
+	return
 end
 
 \end{lstlisting}
@@ -50,12 +63,12 @@ It contains the following ports and generics:
 		cosine\_in & in  & Initial cosine value \\
 		beta\_out & out  & Beta angle value aligned to be in the range \(-\pi/2\) to \(\pi/2\) \\
 		sine\_out & out  & Initial sine value with aligned sign \\
-		cosine\_out & out  & Initial sine value with aligned sign \\
+		cosine\_out & out  & Initial cosine value with aligned sign \\
 		\hline
 	\end{tabular} 
 \end{center}
 
-While in the reference algorithm the input angle can be arbitrarily large, in our case the angle is bound by the fixpoint comma format of our input port which, at this state, consists of 3 integer bits including 1 sign bit and genericly many fractional bits. We chose the integer part to be 3 bits long because it covers the range from \(-\pi\) to \(\pi\) which is sufficient to calculate every possible sine value of one full period. As the maximum input angle in our case is approximately 4 (depending on the number of fraction bits) and the minimum angle is -4, only up to one iteration of this code section is needed.
+While in the reference algorithm the input angle can be arbitrarily large, in our case the angle is bound by the fixpoint comma format used in our implementation, which, at this state, consists of 3 integer bits including 1 sign bit and generically many fractional bits. We chose the integer part to be 3 bits long because it covers the range from \(-\pi\) to \(\pi\), which is sufficient to calculate every possible sine value of one full period. As the maximum input angle in our case is approximately 4 (depending on the number of fraction bits) and the minimum angle is -4, only up to one iteration of this code section is needed.
 
 
 \subsection{cordic\_step.vhd}
@@ -89,13 +102,13 @@ The \textit{cordic\_step} entity implements one single iteration of the algorith
 	\end{tabular} 
 \end{center}
 
-One instance of the component represents one iteration of the algorithm shown in section 1.1 and performs exactly the same operations. In the loop of the refernce algorithm \textit{poweroftwo} refers to a variable with the initial value 1 which is subsequently devided by two in each iteration (representing the term \(2^{-n}\) where \textit{n} is the loop variable) and used in the matrix multiplication to determine the new values of the sine and cosine vector. In our case the same functionality is implemented by simply shifting the current value for \textit{n} bits to the right which is matematically the same operation.
+One instance of the entity represents one iteration of the loop in the algorithm shown in section 1.1. It performs exactly the same operations. In the loop of the reference algorithm, \textit{poweroftwo} refers to a variable with the initial value 1, which is sequentially divided by two in each iteration (representing the term \(2^{-i}\) where \textit{i} is the loop variable) and used in the matrix multiplication to determine the new values of the sine and cosine vector. In our case the same functionality is implemented by simply shifting the current value for \textit{i} bits to the right, which is mathematically the same operation.
 
-Instead of calculating a \textit{sigma} to determine the sign of the factor used in the matrix multiplication as it is done in the reference algorithm, we decided to simply use an if-statement checking the sign of \textit{beta} and perform either addition or subtraction accordingly. By doing so we completely eradicated the matrixmultiplication from our implementation and broke it down to a sequence of shifts, control flow checks, additions and subtractions. This was to keep the implementation simple and to maintain good performance due to multiplication in VHDL being much slower than the operations mentioned above.
+Instead of calculating a \textit{sigma} to determine the sign of the factor used in the matrix multiplication, as it is done in the reference algorithm, we decided to simply use an if-statement checking the sign of \textit{beta} and perform either addition or subtraction accordingly. By doing so, we completely eradicated the matrix multiplication from our implementation and broke it down to a sequence of shifts, control flow checks, additions and subtractions. This was to keep the implementation simple and to maintain good performance due to multiplication in VHDL being much slower than the operations mentioned above.
 
 \subsection{mult.vhd} 
 
-The \textit{mult} entity is used for the final step of the algorithm: The multiplication with the correction factor \textit{Kn}. It provides the following ports and generics:
+The \textit{mult} entity is used for the final step of the algorithm:  multiplication with the correction factor \textit{Kn}. It provides the following ports and generics:
 
 \begin{center}
 	\begin{tabular}{ | l | c | l | }
@@ -121,7 +134,7 @@ The \textit{mult} entity is used for the final step of the algorithm: The multip
 	\end{tabular} 
 \end{center}
 
-The bit width of the result signal is of course double the length of dataa and datab.
+The bit width of the result signal is of course double the length of dataa and datab to ensure that no data loss occurs during the multiplication.
 
 \subsection{sine\_cordic.vhd}
 
@@ -156,4 +169,4 @@ The entity comes with the following ports:
 	\end{tabular} 
 \end{center}
 
-The generic \textit{ITERATION\_COUNT} defines how many instances of the \textit{cordic\_step} entity are put together in the pipeline. This means that after \textit{ITERATION\_COUNT} + 2 clock cycles after a set \textit{start} bit the calculation should be finished and the \textit{done} bit should be set. 
+The generic \textit{ITERATION\_COUNT} defines how many instances of the \textit{cordic\_step} entity are put together in the pipeline. This means that, after \textit{ITERATION\_COUNT} + 2 clock cycles after a set \textit{start} bit, the calculation should be finished and the \textit{done} bit set. 

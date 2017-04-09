@@ -1,1 +1,28 @@
-\section{Results}
+\section{Testing and Results}
+
+For testing, we wrote a small testbench that generates a clock signal and feeds the \textit{sine\_cordic} component with input values. We tested the component with our default configuration of an 8-bit input port (\textit{beta}), 8-bit output port (\textit{result}) and 12 
+iterations of the algorithm.
+
+\begin{center}
+	\begin{tabular}{ | c | c | c | c | }
+		\hline
+		\textbf{Input} & \textbf{Result} & \textbf{Reference} & \textbf{Difference} \\
+		\hline
+		\(\pi\) & \(0\) & \(0\) & \(0\) \\
+		\(-\pi\) & \(0\)  & \(0\) & \(0\) \\
+		\(\pi/2\) & \(1\)  & \(1\) & \(0\) \\
+		\(-\pi/2\) & \(-1\)  & \(-1\) & \(0\) \\
+		\(\pi/3\) & \(0.875\)  & \(0.866025\) & \(0.008975\) \\
+		\(-\pi/3\) & \(-0.875\)  & \(-0.866025\) & \(0.008975\) \\
+		\(\pi/4\) & \(0.71875\)  & \(0.707107\) & \(0.011643\) \\
+		\(-\pi/4\) & \(-0.71875\)  & \(-0.707107\) & \(0.011643\) \\
+		\(\pi/6\) & \(0.5\)  & \(-0.5\) & \(0\) \\
+		\(-\pi/6\) & \(-0.5\)  & \(-0.5\) & \(0\) \\
+		\(0\) & \(0\) & \(0\) & \(0\) \\
+		\hline
+	\end{tabular} 
+\end{center}
+
+
+
+  

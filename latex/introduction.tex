@@ -1,8 +1,8 @@
 \section{Introduction}
-Our task was to implement a sine calculation for a given angle using the CORDIC ( \textbf{CO}ordinate \textbf{R}otation \textbf{DI}gital \textbf{C}omputer) algorithm. We used the Matlab software example code from Wikipedia \cite{cordic_algorithm} as a guideline for our implementation. For developement and simulation we used ModelSim.
+Our task was to implement an algorithm that performs a sine calculation for a given angle using the CORDIC ( \textbf{CO}ordinate \textbf{R}otation \textbf{DI}gital \textbf{C}omputer) algorithm. We used the Matlab software example code from Wikipedia [\href{https://en.wikipedia.org/wiki/CORDIC}{https://en.wikipedia.org/wiki/CORDIC}] as a guideline for our implementation. For developement and simulation we used ModelSim.
 
 
-\subsection{Refernce algorithm implemented in Matlab}
+\subsection{Reference algorithm implemented in Matlab}
 
 \begin{lstlisting}[language=Matlab]
 function v = cordic(beta,n)
@@ -10,13 +10,13 @@ function v = cordic(beta,n)
 % using n iterations. Increasing n will increase the precision.
 
 if beta < -pi/2 || beta > pi/2
-if beta < 0
-v = cordic(beta + pi, n);
-else
-v = cordic(beta - pi, n);
-end
-v = -v; % flip the sign for second or third quadrant
-return
+	if beta < 0
+		v = cordic(beta + pi, n);
+	else
+		v = cordic(beta - pi, n);
+	end
+	v = -v; % flip the sign for second or third quadrant
+	return
 end
 
 % Initialization of tables of constants used by CORDIC
@@ -48,23 +48,23 @@ angle = angles(1);
 
 % Iterations
 for j = 0:n-1;
-if beta < 0
-sigma = -1;
-else
-sigma = 1;
-end
-factor = sigma * poweroftwo;
-% Note the matrix multiplication can be done using scaling by powers of two and addition subtraction
-R = [1, -factor; factor, 1];
-v = R * v; % 2-by-2 matrix multiply
-beta = beta - sigma * angle; % update the remaining angle
-poweroftwo = poweroftwo / 2;
-% update the angle from table, or eventually by just dividing by two
-if j+2 > length(angles)
-angle = angle / 2;
-else
-angle = angles(j+2);
-end
+	if beta < 0
+		sigma = -1;
+	else
+		sigma = 1;
+	end
+	factor = sigma * poweroftwo;
+	% Note the matrix multiplication can be done using scaling by powers of two and addition subtraction
+	R = [1, -factor; factor, 1];
+	v = R * v; % 2-by-2 matrix multiply
+	beta = beta - sigma * angle; % update the remaining angle
+	poweroftwo = poweroftwo / 2;
+	% update the angle from table, or eventually by just dividing by two
+	if j+2 > length(angles)
+		angle = angle / 2;
+	else
+		angle = angles(j+2);
+	end
 end
 
 % Adjust length of output vector to be [cos(beta), sin(beta)]:
