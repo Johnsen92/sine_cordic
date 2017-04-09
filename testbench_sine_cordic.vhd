@@ -27,9 +27,10 @@ architecture beh of testbench is
     end component;
 
     constant CLK_PERIOD : time := 2 ps;
-    constant INPUT_DATA_WIDTH : integer := 8;
+    constant INPUT_DATA_WIDTH : integer := 16;
     constant OUTPUT_DATA_WIDTH : integer := 8;
     constant ITERATION_COUNT : integer := 12;
+    constant INTERNAL_DATA_WIDTH : integer := MAX(INPUT_DATA_WIDTH, OUTPUT_DATA_WIDTH);
     type testcase_array is array(10 downto 0) of real;
     constant testcases : testcase_array := (
         0.0,
@@ -40,7 +41,7 @@ architecture beh of testbench is
         MATH_PI*4.0**(-1),
         -MATH_PI*4.0**(-1),
         MATH_PI*6.0**(-1),
-        MATH_PI*6.0**(-1),
+        -MATH_PI*6.0**(-1),
         MATH_PI,
         -MATH_PI
     );
@@ -92,6 +93,7 @@ begin
 
     -- Generates the input
     input : process
+        variable data : CORDIC_DATA_TYPE;
     begin  -- process input
         start <= '0';
         beta <= (others => '0');
@@ -103,11 +105,20 @@ begin
             testcase <= testcases(i);
             beta <= float_to_fixed(testcases(i), INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH);
             start <= '1';
+            data(2) := testcases(i);
+            data(1) := 0.0;
+            data(0) := 1.0;
+            for j in 1 to ITERATION_COUNT loop
+                data := compute_cordic_step(data, j-1);
+            end loop;
+            data(2) := data(2)*fixed_to_float(cumulative_product_k(ITERATION_COUNT, INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INTERNAL_DATA_WIDTH), INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES);
+            data(1) := data(1)*fixed_to_float(cumulative_product_k(ITERATION_COUNT, INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INTERNAL_DATA_WIDTH), INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES);
             wait until rising_edge(clk);
             start <= '0';
-            
             wait until rising_edge(done);
             comparison <= sin(testcases(i));
+            wait until rising_edge(clk);
+            report "###########################################" & lf & "sin(" & real'image(testcases(i)) & "): " & lf & " hw_cordic_sin: " & real'image(result_converted) & lf & " sw_cordic_sin: " & real'image(data(1)) & lf & "sw_control_sin: " & real'image(sin(testcases(i)));
         end loop;
         
         wait;

@@ -51,6 +51,16 @@ package body sine_cordic_constants is
         variable factor : real := 1.0 ;
         variable data_out : CORDIC_DATA_TYPE := (0.0, 0.0, 0.0);
     begin
+        if beta < -MATH_PI*2.0**(-1) or beta > MATH_PI*2.0**(-1) then
+            if beta < 0.0 then
+                beta := beta + MATH_PI;
+            else
+                beta := beta - MATH_PI;
+            end if;
+            cosine := -cosine;
+            sine := -sine;
+        end if;
+        
         if beta < 0.0 then
             sigma := -1;
         else
@@ -68,7 +78,7 @@ package body sine_cordic_constants is
     function float_to_fixed(x : real; b : integer; w : integer) return std_logic_vector
     is
     begin
-        return std_logic_vector(to_signed(integer((x*2.0**b)), w));
+        return std_logic_vector(to_signed(integer(round(x*2.0**b)), w));
     end function;
     
     function fixed_to_float(x : std_logic_vector; b : integer) return real

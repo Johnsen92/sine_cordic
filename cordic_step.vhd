@@ -30,7 +30,11 @@ begin  -- cordic_step_arc
 
 	cordic_iteration : process(alpha, beta_in, sine_in, cosine_in, poweroftwo)
 	begin
-		if signed(beta_in) < 0 then
+        if (poweroftwo > DATA_WIDTH) then
+            cosine_int <= cosine_in;
+            sine_int <= sine_in;
+            beta_int <= beta_in;
+		elsif signed(beta_in) < 0 then
 			cosine_int <= std_logic_vector(signed(cosine_in) + shift_right(signed(sine_in), poweroftwo));
 			sine_int <= std_logic_vector(signed(sine_in) - shift_right(signed(cosine_in), poweroftwo));
 			beta_int <= std_logic_vector(signed(beta_in) + signed(alpha));

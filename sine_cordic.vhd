@@ -77,19 +77,21 @@ architecture syn of sine_cordic is
     signal control : std_logic_vector(ITERATION_COUNT downto 0);
     signal control_init : std_logic;
     signal mult_result : std_logic_vector(INTERNAL_DATA_WIDTH*2-1 downto 0);
+    signal round_result : std_logic_vector(OUTPUT_DATA_WIDTH downto 0);
     
-    constant RESULT_HIGH : integer := OUTPUT_DATA_WIDTH-1;
+    constant RESULT_HIGH : integer := OUTPUT_DATA_WIDTH;
     constant MULT_RESULT_HIGH : integer := mult_result'high - Q_FORMAT_INTEGER_PLACES;
     -- shifted to account for n integer places results in 2*n integer places after multiplication
-    constant MULT_RESULT_LOW : integer := MAX(MULT_RESULT_HIGH+1 - OUTPUT_DATA_WIDTH, 0);
-    constant RESULT_LOW : integer := MAX(OUTPUT_DATA_WIDTH - (MULT_RESULT_HIGH+1 - MULT_RESULT_LOW), 0);
+    constant MULT_RESULT_LOW : integer := MAX(MULT_RESULT_HIGH+1 - (OUTPUT_DATA_WIDTH+1), 0);
+    constant RESULT_LOW : integer := MAX(OUTPUT_DATA_WIDTH+1 - (MULT_RESULT_HIGH+1 - MULT_RESULT_LOW), 0);
     
 begin
     k_n <= cumulative_product_k(ITERATION_COUNT, INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INTERNAL_DATA_WIDTH);
     beta_cast(INTERNAL_DATA_WIDTH-1 downto MAX(INTERNAL_DATA_WIDTH - INPUT_DATA_WIDTH, 0)) <= beta;
     beta_cast((INTERNAL_DATA_WIDTH - INPUT_DATA_WIDTH)-1 downto 0) <= (others => '0');
-    result(RESULT_LOW-1 downto 0) <= (others => '0');
-    result(RESULT_HIGH downto RESULT_LOW) <= mult_result(MULT_RESULT_HIGH downto MULT_RESULT_LOW);
+    round_result(RESULT_LOW-1 downto 0) <= (others => '0');
+    round_result(RESULT_HIGH downto RESULT_LOW) <= std_logic_vector(unsigned(mult_result(MULT_RESULT_HIGH downto MULT_RESULT_LOW)) + 1);
+    result <= round_result(OUTPUT_DATA_WIDTH downto 1);
     done <= control(ITERATION_COUNT);
     
     step_gen : for j in 1 to ITERATION_COUNT generate
@@ -134,7 +136,7 @@ begin
             sine_out   => sine_init,
             cosine_out => cosine_init
         );
-
+    
     sync : process(reset, clk)
     begin
         if(rising_edge(clk)) then
