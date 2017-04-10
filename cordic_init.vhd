@@ -5,6 +5,12 @@ use ieee.math_real.all;
 
 use work.sine_cordic_constants.all;
 
+-- This component is used to convert an angle beta to a value between -pi/2 and pi/2.
+-- The number format used - Q(3, Y) - restricts possible inputs so that only an
+-- addition/subtraction operation is needed.
+-- As per the CORDIC algorithm, the sine/cosine values of the initial estimate are
+-- negated to reflect this shift.
+
 entity cordic_init is
 	generic (
         	DATA_WIDTH  : integer := 8

@@ -31,7 +31,7 @@ architecture beh of testbench is
     constant OUTPUT_DATA_WIDTH : integer := 8;
     constant ITERATION_COUNT : integer := 12;
     constant INTERNAL_DATA_WIDTH : integer := MAX(INPUT_DATA_WIDTH, OUTPUT_DATA_WIDTH);
-    type testcase_array is array(10 downto 0) of real;
+    type testcase_array is array(18 downto 0) of real;
     constant testcases : testcase_array := (
         0.0,
         MATH_PI*2.0**(-1),
@@ -43,7 +43,15 @@ architecture beh of testbench is
         MATH_PI*6.0**(-1),
         -MATH_PI*6.0**(-1),
         MATH_PI,
-        -MATH_PI
+        -MATH_PI,
+        1.0,
+        -1.0,
+        1.23,
+        -1.23,
+        0.01,
+        -0.01,
+        2.5,
+        -2.5
     );
 
     signal clk, reset : std_logic;
@@ -105,6 +113,7 @@ begin
             testcase <= testcases(i);
             beta <= float_to_fixed(testcases(i), INPUT_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INPUT_DATA_WIDTH);
             start <= '1';
+            
             data(2) := testcases(i);
             data(1) := 0.0;
             data(0) := 1.0;
@@ -113,6 +122,7 @@ begin
             end loop;
             data(2) := data(2)*fixed_to_float(cumulative_product_k(ITERATION_COUNT, INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INTERNAL_DATA_WIDTH), INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES);
             data(1) := data(1)*fixed_to_float(cumulative_product_k(ITERATION_COUNT, INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INTERNAL_DATA_WIDTH), INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES);
+            
             wait until rising_edge(clk);
             start <= '0';
             wait until rising_edge(done);

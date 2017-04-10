@@ -69,7 +69,9 @@ architecture syn of sine_cordic is
     
     constant INTERNAL_DATA_WIDTH : integer := MAX(INPUT_DATA_WIDTH, OUTPUT_DATA_WIDTH) + 6;
     
-    type DATA_ARRAY_TYPE is array(0 to ITERATION_COUNT) of std_logic_vector(INTERNAL_DATA_WIDTH-1 downto 0); --extra output at end; ITERATION_COUNT is used instead of I_C-1 as an ITERATION_COUNT of 0 should also be supported
+    --extra output at the end; ITERATION_COUNT is used instead of I_C-1 as an ITERATION_COUNT of 0 should also
+    --be supported
+    type DATA_ARRAY_TYPE is array(0 to ITERATION_COUNT) of std_logic_vector(INTERNAL_DATA_WIDTH-1 downto 0);
     
     signal k_n : std_logic_vector(INTERNAL_DATA_WIDTH-1 downto 0);
     signal beta_cast, beta_init, sine_init, cosine_init : std_logic_vector(INTERNAL_DATA_WIDTH-1 downto 0);
@@ -86,14 +88,24 @@ architecture syn of sine_cordic is
     constant RESULT_LOW : integer := MAX(OUTPUT_DATA_WIDTH+1 - (MULT_RESULT_HIGH+1 - MULT_RESULT_LOW), 0);
     
 begin
+    -- k_n, a predetermined value, is multiplied to the end result for normalization between -1 and 1.
     k_n <= cumulative_product_k(ITERATION_COUNT, INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INTERNAL_DATA_WIDTH);
+    -- The input beta is cast to its internal format equivalent.
     beta_cast(INTERNAL_DATA_WIDTH-1 downto MAX(INTERNAL_DATA_WIDTH - INPUT_DATA_WIDTH, 0)) <= beta;
     beta_cast((INTERNAL_DATA_WIDTH - INPUT_DATA_WIDTH)-1 downto 0) <= (others => '0');
+    -- After multiplication with k_n, one additional bit is extracted from the multiplication result
+    -- to round to the nearest value allowed in the representation. The added 1 accomplishes this rounding
+    -- automatically.
     round_result(RESULT_LOW-1 downto 0) <= (others => '0');
     round_result(RESULT_HIGH downto RESULT_LOW) <= std_logic_vector(unsigned(mult_result(MULT_RESULT_HIGH downto MULT_RESULT_LOW)) + 1);
+    -- The least significant bit of round_result was merely used for rounding; extract the MSBs
     result <= round_result(OUTPUT_DATA_WIDTH downto 1);
     done <= control(ITERATION_COUNT);
     
+    -- The iterations of the estimate are stored in an array: the lowest index contains the initial
+    -- estimates and angle determined by the cordic_init component, and consecutive iterations are stored
+    -- after each other in the array. The final place in the sine array is the final approximation before
+    -- removing gain through multiplication with k_n.
     step_gen : for j in 1 to ITERATION_COUNT generate
     begin
         cordic_step_inst : cordic_step
@@ -112,6 +124,9 @@ begin
             );
     end generate;
     
+    -- The final approximation is normalized with the factor k_n. As both are in Q(3, Y) format, the result
+    -- of the multiplication is Q(6, 2*Y); the proper bits must be extracted from this result and the others
+    -- ignored, as is done for the round_result signal utilizing the above HIGH/LOW constants.
     mult_inst : mult
         generic map (
             DATA_WIDTH  => INTERNAL_DATA_WIDTH
@@ -124,6 +139,8 @@ begin
             result  => mult_result
         );
 
+    -- The init component ensures possible values further from 0 than pi/2 are converted as is required
+    -- by the CORDIC algorithm. The initial estimate of sin(beta)=0 and cos(beta)=1 is entered here.
     init_inst : cordic_init
         generic map (
             DATA_WIDTH  => INTERNAL_DATA_WIDTH
@@ -147,10 +164,15 @@ begin
                 control         <= (others => '0');
                 control_init	<= '0';
             else
+                -- The control signals are used to determine the state of the pipeline: a 1 in a place of the
+                -- control vector signifies a request is in that stage of computation. A 1 in the last place
+                -- signifies a completed request and raises the done signal.
                 control(ITERATION_COUNT downto 1)   <= control(ITERATION_COUNT-1 downto 0);
                 control(0)                          <= control_init;
                 control_init                        <= start;
-               
+                
+                -- These arrays are used to latch the data between two consecutive iterations of the
+                -- algorithm.
                 beta_array(0)   <= beta_init;
                 for i in 1 to ITERATION_COUNT loop
                     beta_array(i)   <= beta_array_next(i);
