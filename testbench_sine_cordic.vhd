@@ -14,6 +14,7 @@ architecture beh of testbench is
         generic (
             INPUT_DATA_WIDTH    : integer := 8;
             OUTPUT_DATA_WIDTH   : integer := 8;
+            INTERNAL_DATA_WIDTH : integer := 14;
             ITERATION_COUNT     : integer := 12
         );
         port (
@@ -30,7 +31,7 @@ architecture beh of testbench is
     constant INPUT_DATA_WIDTH : integer := 8;
     constant OUTPUT_DATA_WIDTH : integer := 8;
     constant ITERATION_COUNT : integer := 12;
-    constant INTERNAL_DATA_WIDTH : integer := MAX(INPUT_DATA_WIDTH, OUTPUT_DATA_WIDTH);
+    constant INTERNAL_DATA_WIDTH : integer := MAX(INPUT_DATA_WIDTH, OUTPUT_DATA_WIDTH) + 6;
     type testcase_array is array(18 downto 0) of real;
     constant testcases : testcase_array := (
         0.0,
@@ -70,6 +71,7 @@ begin
         generic map (
             INPUT_DATA_WIDTH    => INPUT_DATA_WIDTH,
             OUTPUT_DATA_WIDTH   => OUTPUT_DATA_WIDTH,
+            INTERNAL_DATA_WIDTH => INTERNAL_DATA_WIDTH,
             ITERATION_COUNT     => ITERATION_COUNT
         )
         port map (

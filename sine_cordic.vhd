@@ -9,6 +9,7 @@ entity sine_cordic is
     generic (
         INPUT_DATA_WIDTH    : integer := 8;
         OUTPUT_DATA_WIDTH   : integer := 8;
+        INTERNAL_DATA_WIDTH : integer := 14;
         ITERATION_COUNT     : integer := 12
     );
     port (
@@ -65,9 +66,7 @@ architecture syn of sine_cordic is
             sine_out    : out std_logic_vector(DATA_WIDTH-1 downto 0);
             cosine_out  : out std_logic_vector(DATA_WIDTH-1 downto 0)
         );
-    end component;    
-    
-    constant INTERNAL_DATA_WIDTH : integer := MAX(INPUT_DATA_WIDTH, OUTPUT_DATA_WIDTH) + 6;
+    end component;
     
     --extra output at the end; ITERATION_COUNT is used instead of I_C-1 as an ITERATION_COUNT of 0 should also
     --be supported
@@ -91,7 +90,7 @@ begin
     -- k_n, a predetermined value, is multiplied to the end result for normalization between -1 and 1.
     k_n <= cumulative_product_k(ITERATION_COUNT, INTERNAL_DATA_WIDTH - Q_FORMAT_INTEGER_PLACES, INTERNAL_DATA_WIDTH);
     -- The input beta is cast to its internal format equivalent.
-    beta_cast(INTERNAL_DATA_WIDTH-1 downto MAX(INTERNAL_DATA_WIDTH - INPUT_DATA_WIDTH, 0)) <= beta;
+    beta_cast(INTERNAL_DATA_WIDTH-1 downto MAX(INTERNAL_DATA_WIDTH - INPUT_DATA_WIDTH, 0)) <= beta(INPUT_DATA_WIDTH-1 downto MAX(INPUT_DATA_WIDTH - INTERNAL_DATA_WIDTH, 0));
     beta_cast((INTERNAL_DATA_WIDTH - INPUT_DATA_WIDTH)-1 downto 0) <= (others => '0');
     -- After multiplication with k_n, one additional bit is extracted from the multiplication result
     -- to round to the nearest value allowed in the representation. The added 1 accomplishes this rounding
